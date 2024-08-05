@@ -1,0 +1,34 @@
+version: "3.9"
+
+services:
+  postgresql:
+    image: postgres:15-alpine
+    ports:
+      - "5432:5432"
+    restart: always
+    env_file:
+      - .env.db
+    volumes:
+      - db-data:/var/lib/postgresql/data
+
+  bot_handler:
+    build:
+      context: ./bot-handler
+    restart: always
+    depends_on:
+      - postgresql
+    env_file:
+      - .env
+
+#  bot_notification:
+#    build:
+#      context: ./bot-notification
+#    restart: always
+#    depends_on:
+#      - postgresql
+#    env_file:
+#      - .env
+
+
+volumes:
+  db-data:
