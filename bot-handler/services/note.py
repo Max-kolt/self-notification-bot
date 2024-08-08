@@ -1,5 +1,5 @@
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
+from sqlalchemy import select, delete
 from sqlalchemy import Sequence
 from pydantic import BaseModel
 from datetime import datetime
@@ -7,10 +7,10 @@ from loguru import logger
 from datetime import datetime
 
 from database import Note, User
-from exceptions import Unregistered
 
 
 class NoteSchema(BaseModel):
+    id: int | None
     telegram_id: int
     text: str
     date: str
@@ -56,6 +56,7 @@ class NoteService:
 
         user_notes = [
             NoteSchema(
+                id=row.id,
                 telegram_id=telegram_id,
                 text=row.text,
                 date=datetime.strptime(str(row.reminder_time), "%Y-%m-%d %H:%M:%S").strftime("%d-%m-%Y"),
@@ -65,4 +66,22 @@ class NoteService:
         ]
 
         return user_notes
+
+    @staticmethod
+    async def delete_note(session: AsyncSession, note_id: int) -> bool:
+        """
+        Deleting note
+        :param session: database session
+        :param note_id: id of note
+        """
+        note_to_delete = await session.scalar(select(Note).where(Note.id == note_id))
+        if not note_to_delete:
+            raise ModuleNotFoundError()
+
+        await session.delete(note_to_delete)
+        await session.commit()
+        logger.debug(f"{note_id} note is deleted")
+        return True
+
+
 

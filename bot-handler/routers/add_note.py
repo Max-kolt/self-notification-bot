@@ -7,7 +7,6 @@ from loguru import logger
 
 from states import AddNote
 from services import NoteService, NoteSchema
-from exceptions import Unregistered
 
 
 add_notes_router = Router(name="Add notes")
@@ -23,7 +22,7 @@ async def start_new_note(message: Message, state: FSMContext):
     await state.clear()
     await state.set_state(AddNote.text)
     await state.update_data(telegram_id=message.from_user.id)
-    await message.answer("Напишите текст заметки.")
+    await message.answer("Какое событие вы хотите записать?")
 
 
 @add_notes_router.message(AddNote.text, F.text.as_("text"))
@@ -36,8 +35,8 @@ async def process_text(message: Message, state: FSMContext, text: str):
     """
     await state.update_data(text=text)
     await state.set_state(AddNote.date)
-    await message.delete()
-    await message.answer(f"Теперь напишите дату когда вам прислать уведомление.")
+
+    await message.answer(f"Теперь укажите дату события.")
 
 
 @add_notes_router.message(
@@ -54,8 +53,8 @@ async def process_date(message: Message, state: FSMContext, date: str):
     """
     await state.update_data(date=date)
     await state.set_state(AddNote.time)
-    await message.delete()
-    await message.answer("В какое время прислать уведомление.")
+
+    await message.answer("Укажите время события, за 10 минут до начала пришлем уведомление.")
 
 
 @add_notes_router.message(
@@ -72,11 +71,10 @@ async def process_time(message: Message, state: FSMContext, session: AsyncSessio
     :param time: Result time of reminder
     """
     await state.update_data(time=time)
-    new_note = NoteSchema(**(await state.get_data()))
+    new_note = NoteSchema(id=None, **(await state.get_data()))
     # Saving note
     saved_note = await NoteService.create_new_note(session, new_note)
 
-    await message.delete()
     await message.answer(f"Запись сохранена 📝\n{saved_note.reminder_time}\n{saved_note.text}")
 
     await state.clear()
@@ -89,7 +87,7 @@ async def invalid_date(message: Message):
     Handle INVALID date format
     :param message: Telegram message
     """
-    await message.answer("Неверный формат даты.\nНеобходимо ввести дату в формате: 21-11-2024")
+    await message.answer("Неверный формат даты.\nНеобходимо ввести дату похоже на пример: 21-11-2024")
 
 
 @add_notes_router.message(AddNote.time)
@@ -98,4 +96,4 @@ async def invalid_date(message: Message):
     Handle INVALID time format
     :param message: Telegram message
     """
-    await message.answer("Неверный формат времени.\nНеобходимо ввести время в формате: 13:49")
+    await message.answer("Неверный формат времени.\nНеобходимо ввести время похоже на пример: 19:49")
