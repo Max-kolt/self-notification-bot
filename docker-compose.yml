@@ -20,14 +20,14 @@ services:
     env_file:
       - .env
 
-#  bot_notification:
-#    build:
-#      context: ./bot-notification
-#    restart: always
-#    depends_on:
-#      - postgresql
-#    env_file:
-#      - .env
+  bot_notification:
+    build:
+      context: ./bot-notification
+    restart: always
+    depends_on:
+      - postgresql
+    env_file:
+      - .env
 
 
 volumes:

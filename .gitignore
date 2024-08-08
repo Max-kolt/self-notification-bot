@@ -27,7 +27,10 @@ share/python-wheels/
 MANIFEST
 
 .idea/
+include/
 
 bin
 pyvenv.cfg
 */app_logger.log
+app_logger.log
+*.session*
