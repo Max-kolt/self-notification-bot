@@ -42,7 +42,7 @@ async def process_text(message: Message, state: FSMContext, text: str):
 
 @add_notes_router.message(
     AddNote.date,
-    F.text.regexp(r"(0[1-9]|[12][0-9]|3[01])/(0[1-9]|1[1,2])/(19|20)\d{2}"),  # Simple date validation
+    F.text.regexp(r"(0[1-9]|[12][0-9]|3[01])-(0[1-9]|1[1,2])-(19|20)\d{2}"),  # Simple date validation
     F.text.as_("date")
 )
 async def process_date(message: Message, state: FSMContext, date: str):
@@ -60,7 +60,7 @@ async def process_date(message: Message, state: FSMContext, date: str):
 
 @add_notes_router.message(
     AddNote.time,
-    F.text.regexp(r"^[0-2][0-3]:[0-5][0-9]$"),  # Simple time validation
+    F.text.regexp(r"^[0-2][0-9]:[0-5][0-9]$"),  # Simple time validation
     F.text.as_('time')
 )
 async def process_time(message: Message, state: FSMContext, session: AsyncSession, time: str):
@@ -76,9 +76,8 @@ async def process_time(message: Message, state: FSMContext, session: AsyncSessio
     # Saving note
     saved_note = await NoteService.create_new_note(session, new_note)
 
-
     await message.delete()
-    await message.answer(f"Запись успешно сохранилась 📝\n{saved_note.reminder_time}\n{saved_note.text}")
+    await message.answer(f"Запись сохранена 📝\n{saved_note.reminder_time}\n{saved_note.text}")
 
     await state.clear()
     logger.info(f"User {message.from_user.username} create new note")
@@ -90,7 +89,7 @@ async def invalid_date(message: Message):
     Handle INVALID date format
     :param message: Telegram message
     """
-    await message.answer("Неверный формат даты.\nНеобходимо ввести дату в формате: 21/11/2024")
+    await message.answer("Неверный формат даты.\nНеобходимо ввести дату в формате: 21-11-2024")
 
 
 @add_notes_router.message(AddNote.time)

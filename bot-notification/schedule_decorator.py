@@ -1,7 +1,7 @@
 import asyncio
 
 
-def periodic(minutes: int):
+def periodic(minutes: int = 1):
     """
     Executing a function in a periodic cycle
     :param minutes: period minutes

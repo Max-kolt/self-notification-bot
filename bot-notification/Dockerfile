@@ -1,5 +1,8 @@
 FROM python:3.11-slim
 
+RUN apt install tzdata
+ENV TZ=Europe/Moscow
+
 WORKDIR app
 
 COPY requirements.txt /app/requirements.txt

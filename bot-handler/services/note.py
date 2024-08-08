@@ -34,7 +34,7 @@ class NoteService:
 
         new_note = Note(
             text=note_data.text,
-            reminder_time=datetime.strptime(note_data.time+" "+note_data.date, "%H:%M %d/%m/%Y"),
+            reminder_time=datetime.strptime(note_data.time+" "+note_data.date, "%H:%M %d-%m-%Y"),
             user_id=user_id
         )
         session.add(new_note)
@@ -51,14 +51,14 @@ class NoteService:
         """
         user_id: int = await session.scalar(select(User.id).where(User.telegram_id == telegram_id))
 
-        query = select(Note).where(Note.user_id == user_id)
+        query = select(Note).where(Note.user_id == user_id).order_by(Note.reminder_time)
         result = await session.scalars(query)
 
         user_notes = [
             NoteSchema(
                 telegram_id=telegram_id,
                 text=row.text,
-                date=datetime.strptime(str(row.reminder_time), "%Y-%m-%d %H:%M:%S").strftime("%d/%m/%Y"),
+                date=datetime.strptime(str(row.reminder_time), "%Y-%m-%d %H:%M:%S").strftime("%d-%m-%Y"),
                 time=datetime.strptime(str(row.reminder_time), "%Y-%m-%d %H:%M:%S").strftime("%H:%M")
             ).model_dump(exclude={"telegram_id"})
             for row in result

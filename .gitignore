@@ -34,3 +34,4 @@ pyvenv.cfg
 */app_logger.log
 app_logger.log
 *.session*
+.env
